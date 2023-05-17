@@ -30,8 +30,8 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 **Output** &nbsp;&nbsp;&nbsp; plots/snr_score.py
 
 ## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
-**Why?** &nbsp;&nbsp;&nbsp; Save time
-**Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts
+**Why?** &nbsp;&nbsp;&nbsp; Save time\
+**Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts\
 **Output** &nbsp;&nbsp;&nbsp; parallelized_on_ceci/*
 
 ## Plot error of dvv
