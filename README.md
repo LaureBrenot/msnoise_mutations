@@ -32,7 +32,7 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 ## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
 **Why?** &nbsp;&nbsp;&nbsp; Save time\
 **Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts\
-**Output** &nbsp;&nbsp;&nbsp; parallelized_on_ceci/*
+**Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/*
 
 ## Plot error of dvv
 **Why?** &nbsp;&nbsp;&nbsp; See when a value reliability \
