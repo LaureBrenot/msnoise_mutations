@@ -29,11 +29,6 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 **Result** &nbsp;&nbsp;&nbsp; Give a score for each station pair and set of parameter. The score is the average number of CC stacked to reach 10% of the SNR reference.\
 **Output** &nbsp;&nbsp;&nbsp; plots/snr_score.py
 
-## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
-**Why?** &nbsp;&nbsp;&nbsp; Save time\
-**Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts\
-**Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/*
-
 ## Plot error of dvv
 **Why?** &nbsp;&nbsp;&nbsp; See when a value reliability \
 **Output** &nbsp;&nbsp;&nbsp; plots/errdvv.py
@@ -41,4 +36,9 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 ## Plot several dvv curve on the same figure
 **Why?** &nbsp;&nbsp;&nbsp; Compare dvv variation from a year to another. Have a first look on seasonal variations.\
 **Output** &nbsp;&nbsp;&nbsp; plots/multidvv.py
+
+## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
+**Why?** &nbsp;&nbsp;&nbsp; Save time\
+**Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts\
+**Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/*
 
