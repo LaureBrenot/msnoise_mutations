@@ -5,7 +5,7 @@
 
 ## Zoom in dvv
 **Why?**
-&nbsp;&nbsp;&nbsp; 1 dvv point per day\
+&nbsp;&nbsp;&nbsp; because 1 dvv point per day\
 **Computation**
 &nbsp;&nbsp;&nbsp; Start from compute_cc with config parameter ```keep_all=Y```\
 Modified version of s05compute_mwcs.py and s06compute_dtt.py\
