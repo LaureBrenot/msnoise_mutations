@@ -1,4 +1,4 @@
-# Modification of [MSNoise](https://github.com/ROBelgium/MSNoise)
+# [MSNoise](https://github.com/ROBelgium/MSNoise) mutations
 ## Next mutations
 * Fix plot dvv pairs
 * Zoom in dvv: Compute dvv on a moving window
