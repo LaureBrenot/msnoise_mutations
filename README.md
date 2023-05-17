@@ -40,6 +40,6 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 ## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
 **Why?** &nbsp;&nbsp;&nbsp; Save time\
 **Result** &nbsp;&nbsp;&nbsp; Set up and submission scripts\
-**Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/*
+**Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/* \
 **To do next** &nbsp;&nbsp;&nbsp; Further explanations here
 
