@@ -1,4 +1,4 @@
-# Modification/Addification to MSNoise (https://github.com/ROBelgium/MSNoise)
+# Modification/Addification to [MSNoise](https://github.com/ROBelgium/MSNoise)
 ## Next mutations
 * Plot dvv pairs
 
@@ -6,7 +6,7 @@
 **Why?**
 1 dvv point per day\
 **Computation**
-Start from compute_cc with config parameter "keep_all=Y"\
+Start from compute_cc with config parameter keep_all=Y\
 Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 **Plot**
 Modified version of plots/dvv.py \
