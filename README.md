@@ -1,6 +1,6 @@
 # Modification/Addification to [MSNoise](https://github.com/ROBelgium/MSNoise)
 ## Next mutations
-* Plot dvv pairs
+* Fix plot dvv pairs
 
 ## Zoom in dvv
 **Why?**
