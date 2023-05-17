@@ -3,14 +3,14 @@
 * Fix plot dvv pairs
 
 ## Zoom in dvv
-**Why?**
+***Why?***
 1 dvv point per day\
-**Computation**
+***Computation***
 Start from compute_cc with config parameter keep_all=Y\
 Modified version of s05compute_mwcs.py and s06compute_dtt.py\
-**Plot**
+***Plot***
 Modified version of plots/dvv.py \
-**Result** 
+***Result*** 
 Compute and plot dvv with an higher sampling than 1 point per day based on corr_duration config parameter\
 **Output** zoom_s05compute_mwcs.py, zoom_s06compute_dtt.py, plots/zoomerrdvv.py\
 **To do next**
