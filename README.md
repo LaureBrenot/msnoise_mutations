@@ -4,17 +4,17 @@
 
 ## Zoom in dvv
 ***Why?***
-1 dvv point per day\
+&nbsp;&nbsp;&nbsp; 1 dvv point per day\
 ***Computation***
-Start from compute_cc with config parameter keep_all=Y\
+&nbsp;&nbsp;&nbsp; Start from compute_cc with config parameter ```keep_all=Y```\
 Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 ***Plot***
-Modified version of plots/dvv.py \
+&nbsp;&nbsp;&nbsp; Modified version of plots/dvv.py \
 ***Result*** 
-Compute and plot dvv with an higher sampling than 1 point per day based on corr_duration config parameter\
-**Output** zoom_s05compute_mwcs.py, zoom_s06compute_dtt.py, plots/zoomerrdvv.py\
+&nbsp;&nbsp;&nbsp; Compute and plot dvv with an higher sampling than 1 point per day based on ```corr_duration``` config parameter\
+**Output** &nbsp;&nbsp;&nbsp; zoom_s05compute_mwcs.py, zoom_s06compute_dtt.py, plots/zoomerrdvv.py\
 **To do next**
-Compute dvv on a moving window
+&nbsp;&nbsp;&nbsp; Compute dvv on a moving window
 
 ## Plot error of dvv
 **Why?** See when a value reliability \
