@@ -35,7 +35,7 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 
 ## Plot several dvv curves on the same figure
 **Why?** &nbsp;&nbsp;&nbsp; Compare dvv variation from one year to another. Have a first look at seasonal variations.\
-**Output** &nbsp;&nbsp;&nbsp; plots/multidvv.py
+**Output** &nbsp;&nbsp;&nbsp; plots/multidvv.py, local/compare_multidvv.py
 
 ## Launch MSNoise on [CECI](https://www.ceci-hpc.be/)
 **Why?** &nbsp;&nbsp;&nbsp; Save time\
