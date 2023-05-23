@@ -43,3 +43,5 @@ Modified version of s05compute_mwcs.py and s06compute_dtt.py\
 **Output** &nbsp;&nbsp;&nbsp; Parallelized_on_CECI/* \
 **To do next** &nbsp;&nbsp;&nbsp; Further explanations here
 
+![image](https://github.com/LaureBrenot/msnoise_mutations/assets/133853397/4a56b340-278d-4d4d-8d71-1a80b9f04172)
+
