@@ -8,7 +8,7 @@
 #
 #SBATCH --array=1-250
 #
-#SBATCH --mail-user=laure.brenot@ulb.be
+#SBATCH --mail-user=@
 #SBATCH --mail-type=ALL
 #
 source /home/ulb/gtime/lbrenot/.bashrc
