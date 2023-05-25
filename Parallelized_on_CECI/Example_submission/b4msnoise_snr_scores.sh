@@ -6,7 +6,7 @@
 #SBATCH --time=40:00:00
 #SBATCH --mem-per-cpu=10000
 #
-#SBATCH --mail-user=laure.brenot@ulb.be
+#SBATCH --mail-user=@
 #SBATCH --mail-type=ALL
 #
 source /home/ulb/gtime/lbrenot/.bashrc
