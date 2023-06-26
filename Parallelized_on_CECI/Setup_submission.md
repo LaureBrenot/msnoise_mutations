@@ -33,14 +33,18 @@ vi run_mariadb.sh
 ```
 ifconfig ib0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' > ~/MARIADB.ini
 cd mariadb/
-./bin/mysqld_safe --defaults-file=~/.my.cnf --skip-grant-tables &     *Start the MariaDB server in safe mode, skipping the grant tables (which control user access), and run it in the background*
+./bin/mysqld_safe --defaults-file=~/.my.cnf --skip-grant-tables &     
 ```
+*Start the MariaDB server in safe mode, skipping the grant tables (which control user access), and run it in the background*
 
 vi stop_mariadb.sh
 ```
-./mariadb/bin/mysqladmin -h $( cat MARIADB.ini ) --port 5050 -u root shutdown   *connect to the MariaDB server and initiate a shutdown*
+./mariadb/bin/mysqladmin -h $( cat MARIADB.ini ) --port 5050 -u root shutdown   
 ```
-chmod +x *.sh     *Change the permissions of all files with the ".sh" extension to make them executable*
+*connect to the MariaDB server and initiate a shutdown*
+
+chmod +x *.sh     
+*Change the permissions of all files with the ".sh" extension to make them executable*
 mysql
 ```
 (show databases ;)
@@ -52,14 +56,16 @@ quit
 ```
 
 cd Msnoise_para\
-source activate msnoise_env *Activate the "msnoise_env" virtual environment*
-msnoise db init *in the good folder*
+source activate msnoise_env 
+*Activate the "msnoise_env" virtual environment*
+msnoise db init 
+*in the good folder*
 ```
 10.47.1.1 :5050
 databasename 
 laure
 Msnoise / noise
-[] *easier if empty*
+[] #easier if empty
 ```
 msnoise test
 
