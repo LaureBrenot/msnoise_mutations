@@ -3,7 +3,7 @@ cd mariadb\
 mkdir data\
 cd ..\
 mkdir tmp\
-vi .my.cnf\
+vi .my.cnf *configuration settings for MariaDB*\
 ```
 [mysqld]
 port=5050
@@ -22,22 +22,22 @@ cd mariadb/ \
 touch socket.sock 
 
 cd bin/ \
-mysql_install_db --defaults-file=~/.my.cnf --auth-root-authentication-method=normal    *créer notamment toutes les tables dans data*\
-/home/ulb/gtime/lbrenot/mariadb/bin/mysqld_safe --datadir='/home/ulb/gtime/lbrenot/mariadb/data'\
+mysql_install_db --defaults-file=~/.my.cnf --auth-root-authentication-method=normal    *install and initialize the MariaDB database + create all the necessary tables in the "data" directory*\
+/home/ulb/gtime/lbrenot/mariadb/bin/mysqld_safe --datadir='/home/ulb/gtime/lbrenot/mariadb/data'  *Start the MariaDB server in safe mode, specifying the data directory*\
 
 cd\
 vi run_mariadb.sh
 ```
 ifconfig ib0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' > ~/MARIADB.ini
 cd mariadb/
-./bin/mysqld_safe --defaults-file=~/.my.cnf --skip-grant-tables &
+./bin/mysqld_safe --defaults-file=~/.my.cnf --skip-grant-tables &     *Start the MariaDB server in safe mode, skipping the grant tables (which control user access), and run it in the background*
 ```
 
 vi stop_mariadb.sh
 ```
-./mariadb/bin/mysqladmin -h $( cat MARIADB.ini ) --port 5050 -u root shutdown
+./mariadb/bin/mysqladmin -h $( cat MARIADB.ini ) --port 5050 -u root shutdown   *connect to the MariaDB server and initiate a shutdown*
 ```
-chmod +x *.sh\
+chmod +x *.sh     *Change the permissions of all files with the ".sh" extension to make them executable*\
 mysql
 ```
 (show databases ;)
@@ -49,14 +49,14 @@ quit
 ```
 
 cd Msnoise_para\
-source activate msnoise_env\
+source activate msnoise_env *Activate the "msnoise_env" virtual environment*\
 msnoise db init *in the good folder*\
 ```
 10.47.1.1 :5050
 databasename 
 laure
 Msnoise / noise
-[] (éviter a)
+[] *easier if empty*
 ```
 msnoise test
 
