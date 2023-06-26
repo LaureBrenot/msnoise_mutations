@@ -3,7 +3,8 @@ cd mariadb\
 mkdir data\
 cd ..\
 mkdir tmp\
-vi .my.cnf\ *configuration settings for MariaDB*
+vi .my.cnf\ 
+*configuration settings for MariaDB*
 ```
 [mysqld]
 port=5050
@@ -22,8 +23,10 @@ cd mariadb/ \
 touch socket.sock 
 
 cd bin/ \
-mysql_install_db --defaults-file=~/.my.cnf --auth-root-authentication-method=normal    *install and initialize the MariaDB database + create all the necessary tables in the "data" directory*
-/home/ulb/gtime/lbrenot/mariadb/bin/mysqld_safe --datadir='/home/ulb/gtime/lbrenot/mariadb/data'  *Start the MariaDB server in safe mode, specifying the data directory*
+mysql_install_db --defaults-file=~/.my.cnf --auth-root-authentication-method=normal    
+*install and initialize the MariaDB database + create all the necessary tables in the "data" directory*
+/home/ulb/gtime/lbrenot/mariadb/bin/mysqld_safe --datadir='/home/ulb/gtime/lbrenot/mariadb/data'  
+*Start the MariaDB server in safe mode, specifying the data directory*
 
 cd\
 vi run_mariadb.sh
