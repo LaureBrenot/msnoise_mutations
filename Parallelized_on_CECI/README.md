@@ -1,4 +1,4 @@
-# All the steps in [Setup_submission](https://github.com/LaureBrenot/msnoise_mutations/blob/main/Parallelized_on_CECI/Setup_submission.md)
+# All the steps in [Setup_hpc_for_MSNoise](https://github.com/LaureBrenot/msnoise_mutations/blob/main/Parallelized_on_CECI/Setup_hpc_for_MSNoise.md)
 
 # SUMMARY ONCE IT WORKS
 ./run_mariadb.sh\
