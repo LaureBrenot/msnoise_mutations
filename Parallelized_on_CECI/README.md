@@ -1,3 +1,5 @@
+# All the steps in [Setup_submission](https://github.com/LaureBrenot/msnoise_mutations/blob/main/Parallelized_on_CECI/Setup_submission.md)
+
 # SUMMARY ONCE IT WORKS
 ./run_mariadb.sh\
 mysql
@@ -16,6 +18,7 @@ msnoise db execute "update stations set used_location_codes='--'"\
 msnoise config set enddate=2017-12-31\
 msnoise db execute "select * from stations"\
 msnoise info\
+
 python 3msnoise_config.py\
 msnoise new_jobs –-init\
 sbatch 4msnoise_cccompute.sh \
