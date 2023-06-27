@@ -20,6 +20,6 @@ python 3msnoise_config.py\
 msnoise new_jobs –-init\
 sbatch 4msnoise_cccompute.sh \
 msnoise reset CC \
-sbatch 5… 3 step : ref : I, reset : T, move : D\
+sbatch 5… 3 steps: ref: I, reset: T, done : D\
 sbatch	6 : long\
 ./stop_mariadb.sh
