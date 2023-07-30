@@ -4,7 +4,7 @@
 ./run_mariadb.sh\
 mysql
 ```
-create database databasename
+create database databasename ;
 quit 
 ```
 cd Msnoise_para/volcanoname\
