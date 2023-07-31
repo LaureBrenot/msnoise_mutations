@@ -1,6 +1,6 @@
 # [MSNoise](https://github.com/ROBelgium/MSNoise) mutations
 ## Next mutations
-* Fix plot dvv pairs
+* Fix plot dvv pairs : was already done but the format is "-p N.TAKH.--_N.UMWH.--" and not "-p ID_KWUI_ID_POSI"
 * Zoom in dvv: Compute dvv on a moving window
 
 ## Zoom in dvv
