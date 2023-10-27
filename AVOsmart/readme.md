@@ -11,3 +11,6 @@ add in .../site-package/msnoise/msnoise_mutations.py\
 modify in .../site-package/msnoise/scripts/msnoise.py for msnoise_save.py\
 add in .../site-package/msnoise/scripts/msnoise.py (the new one)\
 
+create new_folder testx \
+put compile_msnoise_B2.py inside\
+run the code
