@@ -7,7 +7,7 @@
 It will install msnoise 1.6.3 version
 6) pip install tables
 
-add in .../site-package/msnoise/msnoise_mutations.py\
+add in .../site-package/msnoise/msnoise_mutations.py with get_ref and get_extension\
 modify in .../site-package/msnoise/scripts/msnoise.py for msnoise_save.py\
 add in .../site-package/msnoise/scripts/msnoise.py (the new one)\
 
