@@ -11,6 +11,6 @@ add in .../site-package/msnoise/msnoise_mutations.py with get_ref and get_extens
 modify in .../site-package/msnoise/scripts/msnoise.py for msnoise_save.py\
 add in .../site-package/msnoise/scripts/msnoise.py (the new one)\
 
-create new_folder testx \
-put compile_msnoise_B2.py inside\
-run the code
+Create new_folder testx with compile_msnoise_B2.py inside\
+Modify data_location, data_output, start_date and end_date\
+Run the code
