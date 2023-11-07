@@ -1,4 +1,13 @@
-#SETUP PYTHON AND MSNOISE
+# SETUP PYTHON AND MSNOISE
+Run setup_for_avosmart.py with the data folder, compile_msnoise_B2.py, msnoise.py, and msnoise_mutations.py all in the same folder.\
+Modify data_location, data_output, start_date and end_date in compile_msnoise_B2.py\
+Run compile_msnoise_B2.py
+
+setup_for_avosmart.py will execute the steps below until "Create new_folder testx with compile_msnoise_B2.py inside" (included).\
+This setup uses SQLite. It means that for each run of setup_for_avosmart.py, a "test" folder will be created associated with one database. The code compile_msnoise_B2.py inside the "test" folder will be specific to the associated database.\
+The output will be in the testx folder. The final result is in file "tt.csv". The intermediate results are in folders CC, STACKS, MWCS and DTT (WCT ... forthcoming).
+
+# OR DO IT MANUALLY
 1) create new environment python 3.7.16
 2) activate the new environment 
 3) conda install -c conda-forge flask-admin flask-wtf markdown folium pymysql logbook
@@ -14,6 +23,3 @@ Create new_folder testx with compile_msnoise_B2.py inside\
 
 Modify data_location, data_output, start_date and end_date\
 Run the code
-
-** OR **
-run setup_for_avosmart.py with the data folder, compile_msnoise_B2.py, msnoise.py, and msnoise_mutations.py all in the same folder. setup_for_avosmart.py will execute the above steps until "Create new_folder testx with compile_msnoise_B2.py inside" (included).
