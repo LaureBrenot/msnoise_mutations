@@ -136,8 +136,8 @@ def compute_msnoise():
 
 
 if __name__ == "__main__":
-    data_location = "C:/Users/laure/OneDrive - Université Libre de Bruxelles/Documents/AThese/Scripts/Scripts_O1/Compile_msnoise/Okmok_test2"
-    data_output = r"C:\Users\laure\OneDrive - Université Libre de Bruxelles\Documents\AThese\Scripts\Scripts_O1\Compile_msnoise\test29"
+    data_location = "C:/Users/laure/OneDrive - Université Libre de Bruxelles/Documents/AThese/Scripts/Scripts_O1/Compile_msnoise/avo_smart/Okmok_data_test"
+    data_output = r"C:\Users\laure\OneDrive - Université Libre de Bruxelles\Documents\AThese\Scripts\Scripts_O1\Compile_msnoise\avo_smart\test1"
     start_date, end_date ='2021-08-05', '2021-08-07'
     start_ref, end_ref = start_date, end_date
     
@@ -147,15 +147,15 @@ if __name__ == "__main__":
             # new station added
             setup_msnoise(data_location, data_output, start_date, end_date, start_ref, end_ref) 
         else:
-            # when modify dates or parameters
+            # when modifying dates or parameters
             modify_msnoise(data_location, data_output, start_date, end_date, start_ref, end_ref) 
     except:
         # first time 
         setup_msnoise(data_location, data_output, start_date, end_date, start_ref, end_ref)
 
-    # compute cross-crorrelation, stack, mwcs, dt/t
+    # compute cross-correlation, stack, mwcs, dt/t
     compute_msnoise()
     # plot network dv/v
-    zoomerrdvv(mov_stack=1)
+    zoomerrdvv(mov_stack=1, show=True)
     # plot dv/v pairs
     #zoomerrdvv(mov_stack=1, pairs=['AV.OKBR._AV.OKCE.', 'AV.OKAK._AV.OKCF.']) 
