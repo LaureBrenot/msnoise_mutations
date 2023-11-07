@@ -10,8 +10,8 @@ It will install msnoise 1.6.3 version
 add in .../site-package/msnoise/msnoise_mutations.py with get_ref and get_extension\
 modify in .../site-package/msnoise/scripts/msnoise.py for msnoise_save.py\
 add in .../site-package/msnoise/scripts/msnoise.py (the new one)\
-
 Create new_folder testx with compile_msnoise_B2.py inside\
+
 Modify data_location, data_output, start_date and end_date\
 Run the code
 
