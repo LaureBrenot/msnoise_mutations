@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-SET UP MSNOISE FOR AVOSMART
+SET UP MSNOISE WATCH
     create new environment python 3.7.16
     activate the new environment
     conda install -c conda-forge flask-admin flask-wtf markdown folium pymysql logbook pywct
@@ -23,7 +23,7 @@ import os
 
 ######## WHAT DO YOU WANT? #########
 ## create new environment python 3.7.16 and install packages
-env_name = "wct_avomsnoise_env"
+env_name = "msnoise_watch_env"
 python_version = "3.7.16"
 
 ############ CODE ###############
