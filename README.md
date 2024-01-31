@@ -4,7 +4,7 @@
 * plot several station pairs
 * Zoom in dvv: Compute dvv on a moving window
   
-## MSnoise_watch
+## MSNoise_watch
 **Why?**
 &nbsp;&nbsp;&nbsp; for real-time observation (to be implemented online)\
 **Computation**
