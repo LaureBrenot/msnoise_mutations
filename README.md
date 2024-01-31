@@ -15,7 +15,7 @@ Modified version of msnoise_mutations.py, msnoise.py, default.py\
 &nbsp;&nbsp;&nbsp; Wavelet \
 **Result**
 &nbsp;&nbsp;&nbsp; Compute and plot dvv with a higher sampling than 1 point per day based on ```corr_duration``` config parameter\
-**Output** &nbsp;&nbsp;&nbsp; dvv with wavelet plots\
+**Output** &nbsp;&nbsp;&nbsp; new environment, CC, STACK,  WCT folders and dvv with wavelet plots\
 **To do next**
 &nbsp;&nbsp;&nbsp; zoom on wavelet plots
 
