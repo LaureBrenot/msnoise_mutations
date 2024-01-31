@@ -3,6 +3,21 @@
 * Fix plot dvv pairs : was already done but the format is "-p N.TAKH.--_N.UMWH.--" and not "-p ID_KWUI_ID_POSI"
 * plot several station pairs
 * Zoom in dvv: Compute dvv on a moving window
+  
+## MSnoise_watch
+**Why?**
+&nbsp;&nbsp;&nbsp; for real-time observation (to be implemented online)\
+**Computation**
+&nbsp;&nbsp;&nbsp; Start from scratch\
+Install MSNoise and MSNoise_mutations by itself with setup_msn_watch.py\
+Modified version of msnoise_mutations.py, msnoise.py, default.py\
+**Plot**
+&nbsp;&nbsp;&nbsp; Wavelet \
+**Result**
+&nbsp;&nbsp;&nbsp; Compute and plot dvv with a higher sampling than 1 point per day based on ```corr_duration``` config parameter\
+**Output** &nbsp;&nbsp;&nbsp; dvv with wavelet plots\
+**To do next**
+&nbsp;&nbsp;&nbsp; zoom on wavelet plots
 
 ## Zoom in dvv
 **Why?**
