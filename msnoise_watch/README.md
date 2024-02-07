@@ -25,3 +25,8 @@ Create new_folder testx with compile_msnoise_C2.py inside\
 
 Modify data_location, data_output, start_date and end_date\
 Run the code
+
+Codes modfified from 
+https://github.com/ROBelgium/MSNoise/tree/efaa9d9ab1078d38ae5fa64dcac22ce4824991e3
+https://github.com/asyates
+https://github.com/Qhig
