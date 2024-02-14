@@ -1,10 +1,10 @@
 # Setup Python and MSNoise
-1) In a prompt run "pyhon setup_for_avosmart.py" with the data folder, compile_msnoise_C2.py, default.py, msnoise.py, and msnoise_mutations.py all in the same folder.\
+1) In a prompt run "pyhon setup_msn_watch.py" with the data folder, compile_msnoise_C2.py, default.py, msnoise.py, and msnoise_mutations.py all in the same folder.\
 2) Modify data_location, data_output, start_date and end_date in compile_msnoise_C2.py\
 3) Run compile_msnoise_C2.py
 
-setup_for_avosmart.py will execute the steps below until "Create new_folder testx with compile_msnoise_C2.py inside" (included).\
-This setup uses SQLite. It means that for each run of setup_for_avosmart.py, a "test" folder will be created associated with one database. The code compile_msnoise_B2.py inside the "test" folder will be specific to the associated database.\
+setup_msn_watch.py will execute the steps below until "Create new_folder testx with compile_msnoise_C2.py inside" (included).\
+This setup uses SQLite. It means that for each run of setup_msn_watch.py, a "test" folder will be created associated with one database. The code compile_msnoise_C2.py inside the "test" folder will be specific to the associated database.\
 The output will be in the testx folder. The final result is in file "tt.csv". The intermediate results are in folders CC, STACKS, MWCS, DTT, and WCT ... forthcoming).
 
 # Or do it manually
@@ -26,7 +26,7 @@ Create new_folder testx with compile_msnoise_C2.py inside\
 Modify data_location, data_output, start_date and end_date\
 Run the code
 
-Codes modfified from 
+Codes modified from 
 https://github.com/ROBelgium/MSNoise/tree/efaa9d9ab1078d38ae5fa64dcac22ce4824991e3
 https://github.com/asyates
 https://github.com/Qhig
