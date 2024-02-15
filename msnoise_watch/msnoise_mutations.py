@@ -170,20 +170,58 @@ def compute_msnoise(job_list):
             update_job(db, job_mwcs.day, job_mwcs.pair, 'WCT', 'T')
         process_job_type(db, 'WCT', 'msnoise compute_wct')
     if 'MWCS' in job_list:
-        process_job_type(db, 'MWCS', 'msnoise compute_mwcs')
+        process_job_type(db, 'MWCS', 'msnoise compute_zoom_mwcs')
     if 'DTT' in job_list:
         process_job_type(db, 'DTT', 'msnoise compute_zoom_dtt')
     if 'DVV' in job_list:
         process_job_type(db, 'DVV', 'msnoise compute_zoom_dvv')
 ##########################################################################################
-    
+
+def build_movstack_timelist(session, mov_stack):
+    """
+    Creates a time array for the analysis period with a time step of 1 hour.
+    The returned tuple contains a start and an end time, and a list of
+    individual times between the two.
+
+    :type session: :class:`sqlalchemy.orm.session.Session`
+    :param session: A :class:`~sqlalchemy.orm.session.Session` object, as
+        obtained by :func:`connect`
+
+    :rtype: tuple
+    :returns: (start, end, timelist)
+    """
+    begin = get_config(session, "startdate")
+    end = get_config(session, "enddate")
+    freq = mov_stack
+
+    begin_datetime = datetime.datetime.strptime(begin, "%Y-%m-%d")
+    begin = begin_datetime.strftime('%Y-%m-%d %H:%M:%S')
+    end_datetime = datetime.datetime.strptime(end, "%Y-%m-%d")
+    end = end_datetime.strftime('%Y-%m-%d 23:59:59')
+    print(begin, end, freq)
+
+    if begin[0] == '-':
+        start = datetime.datetime.today() + datetime.timedelta(hours=int(begin))
+        end = datetime.datetime.today() + datetime.timedelta(hours=int(end))
+    elif begin == "1970-01-01 00:00:00": # TODO this fails when the DA is empty
+        start = session.query(DataAvailability).order_by(
+            DataAvailability.starttime).first().starttime()
+        end = datetime.datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+    else:
+        start = datetime.datetime.strptime(begin, '%Y-%m-%d %H:%M:%S')
+        end = datetime.datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+    end = min(end, datetime.datetime.now())
+    timelist = pd.date_range(start, end, freq=freq).tolist()
+
+    return start, end, timelist
+
+
 def zoom_mwcs(loglevel="INFO"):
     logger = logbook.Logger(__name__)
     # Reconfigure logger to show the pid number in log records
     logger = get_logger('msnoise.compute_mwcs_child', loglevel,
                         with_pid=True)
-    logger.info('*** Starting: Compute MWCS ***')
-    
+    logger.info('*** Starting: Compute MWCS ***')    
     db = connect()
     
     export_format = get_config(db, 'export_format')
@@ -240,15 +278,23 @@ def zoom_mwcs(loglevel="INFO"):
         for f in filters:
             filterid = int(f.ref)
             for components in params.all_components:
+                ref_name = pair.replace('.', '_').replace(':', '_')
+                rf = os.path.join("STACKS", "%02i" %
+                                  filterid, "REF", components,
+                                  ref_name + extension)
+                if not os.path.isfile(rf):
+                    logging.debug("No REF file named %s, skipping." % rf)
+                    continue
+                ref = read(rf)[0].data
                 ref_name1 = pair.replace(':', '_')
-                ref_name = pair.replace('.', '_').replace(':', '_') #
+                #ref_name = pair.replace('.', '_').replace(':', '_') #
                 station1, station2 = pair.split(":")
 
-                ref = get_ref(db, station1.replace('.', '_'), station2.replace('.', '_'), 
-                              filterid, components, params)
+                #ref = get_ref(db, station1.replace('.', '_'), station2.replace('.', '_'), 
+                #              filterid, components, params)
 
                 if not len(ref):
-                    # print("error ref")
+                    #print("error ref")
                     logging.debug("No REF file found for %s.%i.%s, skipping." %
                                    (ref_name, filterid, components))
                     continue
@@ -259,7 +305,7 @@ def zoom_mwcs(loglevel="INFO"):
                     day= datetime.datetime.strptime(str(day)[:10], '%Y-%m-%d')
                     days2.append(day)
                 days = days2
-                # print(days)
+                logger.info(days)
 
                 output_folder = get_config(db, 'output_folder')
                 path = os.path.join(output_folder, "%02i" % int(filterid),
@@ -277,7 +323,7 @@ def zoom_mwcs(loglevel="INFO"):
                     data = get_results_all(db, station1, station2, filterid, components, days)
 
                     data_idx = data.index
-                    # print(data_idx)
+                    #print(data_idx)
                     data=data.to_numpy()
                     for i, cur in enumerate(data):
                         if np.all(np.isnan(cur)):
@@ -304,7 +350,6 @@ def zoom_mwcs(loglevel="INFO"):
                 update_job(db, job.day, job.pair, 'DTT', 'T')
 
     logger.info('*** Finished: Compute MWCS ***')
-    
 #################################################################################################
     
 from obspy.signal.regression import linear_regression
