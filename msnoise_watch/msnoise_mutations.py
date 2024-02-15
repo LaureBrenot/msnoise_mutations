@@ -305,12 +305,12 @@ def zoom_mwcs(loglevel="INFO"):
                     day= datetime.datetime.strptime(str(day)[:10], '%Y-%m-%d')
                     days2.append(day)
                 days = days2
-                logger.info(days)
+                #logger.info(days)
 
                 output_folder = get_config(db, 'output_folder')
                 path = os.path.join(output_folder, "%02i" % int(filterid),
                                     station1, station2, components)
-                print(path, days[0].strftime('%Y-%m-%d.h5'))
+                #print(path, days[0].strftime('%Y-%m-%d.h5'))
                 for mov_stack in mov_stacks:
                     n, data2 = get_results(db, station1, station2, filterid,
                                           components, days, mov_stack,
