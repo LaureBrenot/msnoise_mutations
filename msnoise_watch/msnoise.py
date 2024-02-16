@@ -852,6 +852,29 @@ def compute_wct(ctx):
         for p in processes:
             p.join()
 
+@cli.command(name='compute_zoom_wct')
+@click.pass_context
+def compute_wct(ctx):
+    """Computes the WCT jobs"""
+    #from ..s05compute_wct import main as compute_wct_fct
+    from ..msnoise_mutations import compute_zoom_wct_fct
+    
+    threads = ctx.obj['MSNOISE_threads']
+    delay = ctx.obj['MSNOISE_threadsdelay']
+    loglevel = ctx.obj['MSNOISE_verbosity']
+    if threads == 1:
+        compute_zoom_wct_fct(loglevel=loglevel)
+    else:
+        from multiprocessing import Process
+        processes = []
+        for i in range(threads):
+            p = Process(target=compute_zoom_wct_fct, kwargs={"loglevel": loglevel})
+            p.start()
+            processes.append(p)
+            time.sleep(delay)
+        for p in processes:
+            p.join()
+
 @cli.command(name='compute_dtt')
 @click.pass_context
 @click.option('-i', '--interval', default=1.0, help='Number of days before now to\

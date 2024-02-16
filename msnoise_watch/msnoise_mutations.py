@@ -170,10 +170,23 @@ def compute_msnoise(job_list):
             update_job(db, job_mwcs.day, job_mwcs.pair, 'WCT', 'T')
         process_job_type(db, 'WCT', 'msnoise compute_wct')
     if 'MWCS' in job_list:
-        process_job_type(db, 'MWCS', 'msnoise compute_zoom_mwcs')
+        process_job_type(db, 'MWCS', 'msnoise compute_mwcs')
     if 'DTT' in job_list:
-        process_job_type(db, 'DTT', 'msnoise compute_zoom_dtt')
+        process_job_type(db, 'DTT', 'msnoise compute_dtt')
     if 'DVV' in job_list:
+        process_job_type(db, 'DVV', 'msnoise compute_dvv')
+
+    if 'zoom_WCT' in job_list:
+        # update WCT jobs as MWCS
+        jobs_mwcs = db.query(Job).filter(Job.jobtype == 'MWCS').filter(Job.flag == 'T')
+        for job_mwcs in jobs_mwcs:
+            update_job(db, job_mwcs.day, job_mwcs.pair, 'WCT', 'T')
+        process_job_type(db, 'WCT', 'msnoise compute_zoom_wct')
+    if 'zoom_MWCS' in job_list:
+        process_job_type(db, 'MWCS', 'msnoise compute_zoom_mwcs')
+    if 'zoom_DTT' in job_list:
+        process_job_type(db, 'DTT', 'msnoise compute_zoom_dtt')
+    if 'zoom_DVV' in job_list:
         process_job_type(db, 'DVV', 'msnoise compute_zoom_dvv')
 ##########################################################################################
 
@@ -905,15 +918,17 @@ def zoomerrdvv(mov_stack=None, dttname="M", components='ZZ', filterid=1,
         
 
 
-
-
 #################################################################################################################
+################   ##########      ##########   ####             ####                  ##########################
+#################   ########   ##   ########   #####   #####################   ##################################
+##################   ######   ####   ######   ######   #####################   ##################################
+###################   ####   ######   ####   #######   #####################   ##################################
+####################   ##   ########   ##   ########   #####################   ##################################
+#####################      ##########      #########             ###########   ##################################
 #################################################################################################################
         #########   WCT main function : compute_wct, rest from wxs_dvv of Alec Yates   #########
 #################################################################################################################
 #################################################################################################################
-
-
 
 ## Disable Warnings
 warnings.filterwarnings('ignore')
@@ -1432,12 +1447,27 @@ def read_and_resample(filename):
     dvv_df = dvv_df.resample("D").mean()
     return dvv_df
 
+def zoom_read_and_resample(filename):
+    dvv_df = pd.read_csv(filename, parse_dates=True, index_col=0)
+    dvv_df.columns = dvv_df.columns.astype(float)
+    #dvv_df = dvv_df.resample("D").mean()
+    return dvv_df
+
 def read_and_resample_files(folder_path, files, suffix='_ZZ_'):
     dvv_dfs = []
     for f in files:
         if suffix in f:
             filename = f
             dvv_df = read_and_resample(os.path.join(folder_path, filename))
+            dvv_dfs.append(dvv_df)
+    return pd.concat(dvv_dfs) if len(dvv_dfs) > 0 else None
+
+def zoom_read_and_resample_files(folder_path, files, suffix='_ZZ_'):
+    dvv_dfs = []
+    for f in files:
+        if suffix in f:
+            filename = f
+            dvv_df = zoom_read_and_resample(os.path.join(folder_path, filename))
             dvv_dfs.append(dvv_df)
     return pd.concat(dvv_dfs) if len(dvv_dfs) > 0 else None
 
@@ -1736,9 +1766,267 @@ def plot_wct(config_wct, wanted_plot, mov_stack=None, components='ZZ', filterid=
                     freq_time_plot('coh', coh_means, stat1, networks, stat2, config_wct)   
                 
                 # Plot: dv/v time series within frequency band  #########################################
-                if 'dvv_curve' or 'dvv_coh' in wanted_plot:
+                if 'dvv_curve' in wanted_plot or 'dvv_coh' in wanted_plot:
                     index, dvv_freqslice = var_time_plot('dvv', dvv_means, stat1, stat2, config_wct)
-                if 'coherence_curve' or 'dvv_coh' in wanted_plot:
+                if 'coherence_curve' in wanted_plot or 'dvv_coh' in wanted_plot:
+                    index, coh_freqslice = var_time_plot('coh', coh_means, stat1, stat2, config_wct)
+                if 'dvv_coh' in wanted_plot:
+                    dvv_coh_plot(index, dvv_freqslice, coh_freqslice, stat1, stat2, config_wct)
+
+
+
+
+def compute_zoom_wct_fct(loglevel="INFO"):
+    logger = logbook.Logger(__name__)
+    # Reconfigure logger to show the pid number in log records
+    logger = get_logger('msnoise.compute_wct_child', loglevel,
+                        with_pid=True)
+    logger.info('*** Starting: Compute WCT ***')
+    
+    db = connect()
+
+    params = get_params(db)
+    export_format = get_config(db, 'export_format')
+    if export_format == "BOTH":
+        extension = ".MSEED"
+    else:
+        extension = "."+export_format
+    mov_stacks = params.mov_stack
+
+    goal_sampling_rate = float(get_config(db, "cc_sampling_rate"))
+    #maxlag = float(get_config(db, "maxlag"))
+    ns = float(get_config(db, "wct_ns"))
+    nt = float(get_config(db, "wct_nt"))
+    vpo = float(get_config(db, "wct_vpo"))
+    freqmin_xwt = float(get_config(db, "wct_freqmin"))
+    freqmax_xwt = float(get_config(db, "wct_freqmax"))
+    nptsfreq = float(get_config(db, "wct_nptsfreq"))
+    freqmin_dtt = float(get_config(db, "dtt_freqmin"))
+    freqmax_dtt = float(get_config(db, "dtt_freqmax"))
+    lag_min = float(get_config(db, "dtt_minlag")) 
+    coda_cycles = int(get_config(db, "dtt_codacycles"))
+    min_nonzero = float(get_config(db, "dvv_min_nonzero"))
+    mincoh = float(get_config(db, "dtt_mincoh"))
+    maxdt = float(get_config(db, "dtt_maxdt"))
+
+    params = get_params(db)
+    
+    logger.debug('Ready to compute')
+    # Then we compute the jobs
+    outfolders = []
+    filters = get_filters(db, all=False)
+    time.sleep(np.random.random() * 5)
+    
+    while is_dtt_next_job(db, flag='T', jobtype='WCT'):
+        #TODO would it be possible to make the next 8 lines in the API ?
+        jobs = get_dtt_next_job(db, flag='T', jobtype='WCT')
+        #print('LEN JOB =', len(jobs))
+        if not len(jobs):
+            # edge case, should only occur when is_next returns true, but
+            # get_next receives no jobs (heavily parallelised calls).
+            time.sleep(np.random.random())
+            continue
+        pair = jobs[0].pair
+        refs, days = zip(*[[job.ref, job.day] for job in jobs])
+
+        startdate =  datetime.datetime.strptime(params['startdate'],"%Y-%m-%d")
+        enddate = datetime.datetime.strptime(params['enddate'], "%Y-%m-%d")
+        date_range = pd.date_range(startdate, enddate, freq='d')
+
+        #logger.info(
+        #    "There are WCT jobs for some days to recompute for %s" % pair)
+        for f in filters:
+            filterid = int(f.ref)
+
+            for components in params.all_components:
+                ref_name = pair.replace(':', '_')
+                station1, station2 = pair.split(":")
+                #ref = get_ref(db, station1, station2, filterid, components, params)
+                ref_name = pair.replace('.', '_').replace(':', '_')
+                rf = os.path.join("STACKS", "%02i" %
+                                  filterid, "REF", components,
+                                  ref_name + extension)
+                if not os.path.isfile(rf):
+                    logging.debug("No REF file named %s, skipping." % rf)
+                    continue
+                ref = read(rf)[0].data
+                if not len(ref):
+                    logging.debug("No REF file found for %s.%i.%s, skipping." %
+                                  (ref_name, filterid, components))
+                    continue
+                #ref = ref.data
+                days2 = []
+                for day in date_range:
+                    day= datetime.datetime.strptime(str(day)[:10], '%Y-%m-%d')
+                    days2.append(day)
+                days = days2
+
+                for mov_stack in mov_stacks:
+                    new_datelist = []
+                    dvv_list = []
+                    err_list = []
+                    coh_list = []
+                    mov_stack = int(mov_stack)
+
+
+                    data = get_results_all(db, station1, station2, filterid, components, days)
+                    data_idx = data.index
+                    #print(data_idx)
+                    data=data.to_numpy()
+                    for i, cur in enumerate(data):
+                        if np.all(np.isnan(cur)):
+                            print('NaN found in data, skipping')
+                            continue
+                        logger.debug(
+                            'Processing MWCS for: %s.%s.%02i - %s - %02i days' %
+                            (ref_name, components, filterid, data_idx[i], mov_stack))
+                        
+                        day = data_idx[i]
+                        ########### WCT ##########
+                        if params.wct_norm:
+                            ori_waveform = (ref/ref.max()) 
+                            new_waveform = (cur/cur.max())
+                        else:
+                            ori_waveform = ref
+                            new_waveform = cur
+                        t = get_t_axis(db)
+                    
+                        #WXamp, WXspec, WXangle, Wcoh, WXdt, freqs, coi = xwt(ori_waveform, new_waveform, fs, ns, nt, vpo, freqmin_xwt, freqmax_xwt, nptsfreq)
+                        WXamp, WXspec, WXangle, Wcoh, WXdt, freqs, coi = xwt(ori_waveform, new_waveform, goal_sampling_rate, int(ns), int(nt), int(vpo), freqmin_xwt, freqmax_xwt, int(nptsfreq))
+
+                        dvv, err, wf = get_dvv(freqs, t, WXamp, Wcoh, WXdt, lag_min=int(lag_min), coda_cycles=coda_cycles, mincoh=mincoh, maxdt=maxdt, min_nonzero=min_nonzero, freqmin=freqmin_dtt, freqmax=freqmax_dtt)
+                        coh = get_avgcoh(freqs, t, Wcoh, freqmin_dtt, freqmax_dtt, lag_min=int(lag_min), coda_cycles=coda_cycles)
+
+                        dvv_list.append(dvv)
+                        err_list.append(err)
+                        coh_list.append(coh)
+                        new_datelist.append(day)
+
+                    if len(dvv_list)>1: # Check if the list has more than 1 measurement to save it
+                        inx = np.where((freqs>=freqmin_dtt) & (freqs<=freqmax_dtt)) # Select a new frequency range
+                        dvv_df = pd.DataFrame(columns=freqs[inx], index=new_datelist)
+                        err_df = pd.DataFrame(columns=freqs[inx], index=new_datelist)
+                        coh_df = pd.DataFrame(columns=freqs[inx], index=new_datelist)
+                        for i, date2 in enumerate(new_datelist): # create the corresponding f_t DataFramei
+                            #print(i,date2)
+                            dvv_df.iloc[i]=dvv_list[i]
+                            err_df.iloc[i]=err_list[i]
+                            coh_df.iloc[i]=coh_list[i]
+
+
+                        outfolder = os.path.join(
+                            'WCT', "%02i" % filterid, "%03i_DAYS" % mov_stack, components, ref_name)
+                        if outfolder not in outfolders:
+                            if not os.path.isdir(outfolder):
+                                os.makedirs(outfolder)
+                            outfolders.append(outfolder)
+                            
+                        dfn = "{}_{}_{}-{}.csv".format(pair.replace(":","_"),components,str(dvv_df.index[0]).replace(":","_"),str(dvv_df.index[-1]).replace(":","_")) #labeling
+                        efn = "{}_{}_{}-{}_error.csv".format(pair.replace(":","_"),components,str(err_df.index[0]).replace(":","_"),str(err_df.index[-1]).replace(":","_")) 
+                        cfn = "{}_{}_{}-{}_coh.csv".format(pair.replace(":","_"),components,str(coh_df.index[0]).replace(":","_"),str(coh_df.index[-1]).replace(":","_")) 
+
+                        pathd = os.path.join(outfolder,dfn)
+                        pathe = os.path.join(outfolder,efn)
+                        pathc = os.path.join(outfolder,cfn)
+                        dvv_df.to_csv(pathd)    # Save dvv to .csv
+                        err_df.to_csv(pathe)    #Save err to another csv
+                        coh_df.to_csv(pathc)    #Save coh to another csv
+                        print(pathd)
+                        #np.savetxt(os.path.join(outfolder, "%s.txt" % str(days[i])), output)
+                        del dvv_df, err_df, coh_df
+                    del cur
+
+        # THIS SHOULD BE IN THE API
+        massive_update_job(db, jobs, "D")
+        if not params.hpc:
+            for job in jobs:
+                update_job(db, job.day, job.pair, 'DTT', 'D')
+                update_job(db, job.day, job.pair, 'DVV', 'T')
+
+    logger.info('*** Finished: Compute WCT ***')
+
+def get_zoom_dvv_and_coh(data_type, stat1, stat2, folder_path, comps):
+    all_files = os.listdir(folder_path)
+    networks = [n.split('.')[0] for n in all_files if stat1 in n and stat2 in n and '0.csv' in n]
+    if data_type == 'dvv':
+        dvv_files = [f for f in all_files if stat1 in f and stat2 in f and '0.csv' in f]
+    if data_type == 'coh':
+        dvv_files = [f for f in all_files if stat1 in f and stat2 in f and '0_coh.csv' in f]
+
+    dvv_df_zz = zoom_read_and_resample_files(folder_path, dvv_files, '_ZZ_')
+    dvv_df_nz = zoom_read_and_resample_files(folder_path, dvv_files, '_NZ_')
+    dvv_df_en = zoom_read_and_resample_files(folder_path, dvv_files, '_EN_')
+    dvv_df_ez = zoom_read_and_resample_files(folder_path, dvv_files, '_EZ_')
+
+    # Average of NZ,EZ,EN for all frequencies
+    if len(comps) <= 2:
+        dvv_concat = dvv_df_zz
+    else:
+        dvv_concat = pd.concat((dvv_df_nz, dvv_df_ez, dvv_df_en), join='inner')
+
+    try:
+        dvv_by_row_index = dvv_concat.groupby(dvv_concat.index)
+        # Average of cross-components-correct
+        dvv_means = dvv_by_row_index.mean().astype(float)
+        return dvv_means, networks
+
+    except Exception as e:
+        print('{data_type}_concat empty, skipping ', stat1, stat2)
+        print(dvv_files)
+        print(e)
+
+def plot_zoom_wct(config_wct, wanted_plot, mov_stack=None, components='ZZ', filterid=1, pairs=[], showALL=False, show=False, outfile=None):
+    db = connect()
+    
+    start, end, datelist = build_movstack_datelist(db)
+    
+    start = datetime.datetime.combine(start, datetime.time())
+    end = datetime.datetime.combine(end, datetime.time())
+    
+    if config_wct['startdateplot'] is not None:
+        start = datetime.datetime.strptime(config_wct['startdateplot'], "%Y-%m-%d")
+    if config_wct['enddateplot'] is not None:
+        end = datetime.datetime.strptime(config_wct['enddateplot'], "%Y-%m-%d")
+
+    if mov_stack != 0:
+        mov_stacks = [mov_stack, ]
+    else:
+        mov_stack = get_config(db, "mov_stack")
+        if mov_stack.count(',') == 0:
+            mov_stacks = [int(mov_stack), ]
+        else:
+            mov_stacks = [int(mi) for mi in mov_stack.split(',')]
+    
+    if components.count(","):
+        components = components.split(",")
+    else:
+        components = [components, ]
+
+    for i, mov_stack in enumerate(mov_stacks):
+               
+        for pair in pairs:
+            stat1 = pair.replace('.', '_').split("_")[1]
+            stat2 = pair.replace('.', '_').split("_")[4]
+            ref_name = pair.replace('_', '').replace('.', '_').replace(':', '_')[:-1]
+            for comp in components:
+                folder_path = os.path.join('WCT', "%02i" % filterid, "%03i_DAYS" % mov_stack, comp, ref_name)
+
+                config_wct = {**config_wct, 'folder_path': folder_path}
+                
+
+                # DATA
+                dvv_means, networks = get_zoom_dvv_and_coh('dvv', stat1, stat2, folder_path, comp)
+                coh_means, n = get_zoom_dvv_and_coh('coh', stat1, stat2, folder_path, comp)    
+                
+                # Plot: Freq, time, average dv/v  #####################################################  
+                if 'dvv' in wanted_plot:
+                    freq_time_plot('dvv', dvv_means, stat1, networks, stat2, config_wct)
+                if 'coh' in wanted_plot:
+                    freq_time_plot('coh', coh_means, stat1, networks, stat2, config_wct)   
+                # Plot: dv/v time series within frequency band  #########################################
+                if 'dvv_curve' in wanted_plot or 'dvv_coh' in wanted_plot:
+                    index, dvv_freqslice = var_time_plot('dvv', dvv_means, stat1, stat2, config_wct)
+                if 'coherence_curve' in wanted_plot or 'dvv_coh' in wanted_plot:
                     index, coh_freqslice = var_time_plot('coh', coh_means, stat1, stat2, config_wct)
                 if 'dvv_coh' in wanted_plot:
                     dvv_coh_plot(index, dvv_freqslice, coh_freqslice, stat1, stat2, config_wct)

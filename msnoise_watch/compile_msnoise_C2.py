@@ -30,52 +30,64 @@ This code compute dv/v with one point for 30min
 Plot wavelet
 """
 import os
-from msnoise.msnoise_mutations import zoomerrdvv, parametrization_msnoise, compute_msnoise, plot_wct
+from msnoise.msnoise_mutations import parametrization_msnoise, compute_msnoise, plot_wct, plot_zoom_wct, zoomerrdvv
 
-if __name__ == "__main__":
-    data_location = "C:/Users/laure/OneDrive - Université Libre de Bruxelles/Documents/AThese/Scripts/Scripts_O1/Compile_msnoise_wavelet/Okmok_test"
-    data_output = r"C:\Users\laure\OneDrive - Université Libre de Bruxelles\Documents\AThese\Scripts\Scripts_O1\Compile_msnoise_wavelet\test4"
-    start_date, end_date ='2021-08-05', '2021-08-15'
-    start_ref, end_ref = start_date, end_date
+data_location = "C:/Users/laure/OneDrive - Université Libre de Bruxelles/Documents/AThese/Scripts/Scripts_O1/Compile_msnoise_wavelet/Okmok_test"
+data_output = r"C:\Users\laure\OneDrive - Université Libre de Bruxelles\Documents\AThese\Scripts\Scripts_O1\Compile_msnoise_wavelet\test8"
+start_date, end_date ='2021-08-03', '2021-08-06'
+start_ref, end_ref = start_date, end_date
 
-    config_updates = {'data_folder': data_location,
-                      'output_folder': os.path.join(data_output, 'CROSS_CORRELATIONS'),
-                      'startdate': start_date,
-                      'enddate': end_ref,
-                      'components_to_compute': 'ZZ',
-                      'remove_response': 'N',
-                      'keep_all': 'Y',
-                      'mov_stack': '1',
-                      'ref_begin': start_ref,
-                      'ref_end': end_ref,
-                      'dtt_minlag': '10',
-                      'dtt_maxerr': '0.2',
-                      'dtt_maxdt': '0.2',
-                      'dtt_mincoh': '0.6'} # 'components_to_compute_single_station': 'EN,EZ,NZ',
-    filters = [
-        (1, 0.5, 0.55, 5.0, 4.95, 1, 12, 2, True),
-        (2, 1.0, 1.05, 20.0, 19.95, 0, 12, 2, True)
-    ]
-    
-    # parametrization of msnoise (first time or when changing parameters)
-    parametrization_msnoise(data_output, config_updates, filters)
+config_updates = {'data_folder': data_location,
+                    'data_structure': 'SDS',
+                    'output_folder': os.path.join(data_output, 'CROSS_CORRELATIONS'),
+                    'startdate': start_date,
+                    'enddate': end_ref,
+                    'components_to_compute': 'ZZ',
+                    'remove_response': 'N',
+                    'keep_all': 'Y',
+                    'mov_stack': '1',
+                    'ref_begin': start_ref,
+                    'ref_end': end_ref,
+                    'dtt_minlag': '10',
+                    'dtt_maxerr': '0.2',
+                    'dtt_maxdt': '0.2',
+                    'dtt_mincoh': '0.6'} # 'components_to_compute_single_station': 'EN,EZ,NZ',
+filters = [
+    (1, 0.5, 0.55, 5.0, 4.95, 1, 12, 2, True),
+    (2, 1.0, 1.05, 20.0, 19.95, 0, 12, 2, True)
+]
 
-    # compute cross-correlation, stack, wct, mwcs, dt/t
-    compute_msnoise(['WCT']) #['CC', 'STACK', 'WCT', 'MWCS', 'DTT']
+# parametrization of msnoise (first time or when changing parameters)
+parametrization_msnoise(data_output, config_updates, filters)
 
+# compute cross-correlation, stack, wct, mwcs, dt/t
+work_todo = ['CC', 'STACK', 'zoom_WCT']# 'zoom_MWCS', 'zoom_DTT', 'zoom_DVV']
+compute_msnoise(work_todo) 
+
+#################################################################################################################
+#################################################################################################################
+                                                 ## PLOTS ##
+#################################################################################################################
+#################################################################################################################
+## Wavelet
+if 'WCT' in work_todo or 'zoom_WCT' in work_todo:
     # plot dv/v pairs with wct computation
     event_list = []
     current_config = {'freqmin':'0.5', 'freqmax':'5.0', 'freqranges':[[0.5, 1.0], [1.0, 2.0], [2.0, 4.0], [0.5, 2.0]],
-                  'plot_all_period':False,'startdateplot':start_date, 'enddateplot':end_date, 
-                  'same_dvv_scale':False, 'dvv_min': -1.2, 'dvv_max':1,
-                  'plot_event':True, 'event_list':event_list, 'seasonal_rm':False, 
-                  'save_fig':False}
-    wanted_plot = ['dvv', 'coh', 'dvv_curve', 'coherence_curve', 'dvv_coh']
-    
-    plot_wct(current_config, wanted_plot, pairs=['AV.OKBR._AV.OKCE.', 'AV.OKAK._AV.OKCF.'], mov_stack=1, components='ZZ', filterid=1)
+                'plot_all_period':False,'startdateplot':start_date, 'enddateplot':end_date, 
+                'same_dvv_scale':False, 'dvv_min': -1.2, 'dvv_max':1,
+                'plot_event':True, 'event_list':event_list, 'seasonal_rm':False, 
+                'save_fig':False}
+    wanted_plot = ['dvv', 'coh', 'dvv_curve', 'coherence_curve', 'dvv_coh']#
 
+    if 'WCT' in work_todo:
+        plot_wct(current_config, wanted_plot, pairs=['AV.OKAK._AV.OKNO.'], mov_stack=1, components='ZZ', filterid=1)
+    if 'zoom_WCT' in work_todo:
+        plot_zoom_wct(current_config, wanted_plot, pairs=['AV.OKAK._AV.OKNO.'], mov_stack=1, components='ZZ', filterid=1)
 
+## MWCS
+if 'zoom_DVV' in work_todo:
     # plot network dv/v with mwcs computation
-    #zoomerrdvv(mov_stack=1, show=True)
+    zoomerrdvv(mov_stack=1, show=True)
     # plot dv/v pairs
-    #zoomerrdvv(mov_stack=1, pairs=['AV.OKBR._AV.OKCE.', 'AV.OKAK._AV.OKCF.'])
+    zoomerrdvv(mov_stack=1, pairs=['AV.OKBR._AV.OKCE.', 'AV.OKAK._AV.OKCF.'])
