@@ -11,15 +11,16 @@ cd Msnoise_para/volcanoname\
 source activate msnoise_env\
 msnoise db init (10.47.1.1 :5050)\
 python 1msnoise_data_folder.py\
+python 3msnoise_config.py\
 msnoise populate			\
 sbatch 2msnoise_scan_archive.sh\
 msnoise db execute "select sta, count(*) from data_availability group by sta"\
 msnoise db execute "update stations set used_location_codes='--'"\
 msnoise config set enddate=2017-12-31\
 msnoise db execute "select * from stations"\
-msnoise info\
+msnoise info
 
-python 3msnoise_config.py\
+(python 3msnoise_config.py)\
 msnoise new_jobs –-init\
 sbatch 4msnoise_cccompute.sh \
 msnoise reset CC \
