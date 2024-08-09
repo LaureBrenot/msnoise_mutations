@@ -21,7 +21,7 @@ modify in .../site-package/msnoise/scripts/msnoise.py for msnoise_save.py \
 add in .../site-package/msnoise/scripts/msnoise.py (the new one) \
 modify in .../site-package/msnoise/scripts/default.py for default_save.py
 add in .../site-package/msnoise/scripts/default.py (the new one)
-Create new_folder testx with compile_msnoise_C2.py inside \
+Create new_folder testx with compile_msnoise_C2.py inside
 
 Modify data_location, data_output, start_date and end_date \
 Run the code
