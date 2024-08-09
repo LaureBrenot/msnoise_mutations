@@ -1,6 +1,6 @@
 # Setup Python and MSNoise
-1) In a prompt run "python setup_msn_watch.py" with the data folder, compile_msnoise_C2.py, default.py, msnoise.py, and msnoise_mutations.py all in the same folder. \
-2) Modify data_location, data_output, start_date and end_date in compile_msnoise_C2.py \
+1) In a prompt run "python setup_msn_watch.py" with the data folder, compile_msnoise_C2.py, default.py, msnoise.py, and msnoise_mutations.py all in the same folder.
+2) Modify data_location, data_output, start_date and end_date in compile_msnoise_C2.py
 3) Run compile_msnoise_C2.py
 
 setup_msn_watch.py will execute the steps below until "Create new_folder testx with compile_msnoise_C2.py inside" (included). \
