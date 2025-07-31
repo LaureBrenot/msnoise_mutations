@@ -1,0 +1,218 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<script type='text/javascript' src='//code.jquery.com/jquery-2.0.2.js'></script>
+
+
+<script>
+function get_network_station(callback) {
+    $.ajax({
+        url:'/admin/networks.json',
+        type:'GET',
+        dataType: 'json',
+        success: callback
+        });
+}
+function populate_network(data) {
+    $.each(data, function(i, value) {
+        $('#network').append($('<option>').text(i).attr('value', i));
+    });
+    $('#network').change();
+}
+
+
+function populate_stations(data) {
+    var net = $('#network option:selected').text();
+    $.each(data, function(i, value) {
+    if(i == net) {
+        net = data[i];
+        $.each(net, function(j, value) {
+            $('#station').append($('<option>').text(j).attr('value',value));
+            });
+        }
+    });
+    $('#station').change();
+}
+
+function populate_locations(data) {
+    var net = $('#network option:selected').text();
+    var sta = $('#station option:selected').text();
+    $.each(data, function(i, value) {
+    if(i == net) {
+        net = data[i];
+        $.each(net, function(j, value) {
+            if(j == sta) {
+                sta = data[i][j];
+                locs = sta["locs"];
+                chans = sta["chans"];
+                for(k=0;k<locs.length;k++) {
+                    $('#location').append($('<option>').text(locs[k]).attr('value',locs[k]));
+                    }
+                for(k=0;k<chans.length;k++) {
+                    $('#channel').append($('<option>').text(chans[k]).attr('value',chans[k]));
+                    }
+            }
+        });
+        }
+    });
+    {#$('#location').change();#}
+    $('#channel').change();
+}
+
+function update_filelist(){
+    $('#dates').text("Updating...");
+    var net = $('#network option:selected').text();
+        var sta = $('#station option:selected').text();
+        var loc = $('#location option:selected').text();
+        var chan = $('#channel option:selected').text();
+        $.ajax({
+            url: "/admin/PSD.json",
+            data: JSON.stringify({'net':net,'sta':sta,'loc':loc,'chan':chan}), //returns all cells' data
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'POST',
+            success: function (result) {
+                for(k=0;k<result.files.length;k++) {
+                    $('#file').append($('<option>').text(result.files[k]).attr('value',result.files[k]));
+                    $('#date').append($('<option>').text(result.dates[k]).attr('value',result.dates[k]));
+                    }
+                update_image();
+            },
+            error: function () {
+              console.debug('Something bad happened...');
+              var err = new Error();
+              console.log(err.stack);
+            }
+          });
+
+}
+
+function update_image(){
+
+        var checkExist = setInterval(function() {
+           if ($('#file option:selected').text().length) {
+              clearInterval(checkExist);
+           }
+        }, 300); // check every 100ms
+
+        var net = $('#network option:selected').text();
+        var sta = $('#station option:selected').text();
+        var loc = $('#location option:selected').text();
+        var chan = $('#channel option:selected').text();
+        var file = $('#file option:selected').text();
+        $.ajax({
+            url: "/admin/PSD.png",
+            data: JSON.stringify({'net':net,'sta':sta,'loc':loc,'chan':chan,'file':file, 'format':"base64"}), //returns all cells' data
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'POST',
+            success: function (result) {
+                {#$('#image').src = 'data:image/png;base64,' + result.image;#}
+                $('#image').attr('src', 'data:image/png;base64,' + result.image);
+            },
+            error: function () {
+              console.debug('Something bad happened...');
+              var err = new Error();
+              console.log(err.stack);
+            }
+          });
+    var image = new Image();
+    image.src = $('#image').attr("src");
+    $('#image').attr('width',image.naturalWidth);
+    $('#image').attr('height',image.naturalHeight);
+}
+
+$(document).ready(function() {
+    get_network_station(populate_network);
+
+    $('#network').change(function() {
+        $('#station')
+        .find('option')
+        .remove()
+        .end();
+
+        get_network_station(populate_stations);
+
+    });
+
+    $('#station').change(function() {
+                $('#location')
+        .find('option')
+        .remove()
+        .end();
+                $('#channel')
+        .find('option')
+        .remove()
+        .end();
+
+                $('#file')
+        .find('option')
+        .remove()
+        .end();
+
+                $('#date')
+        .find('option')
+        .remove()
+        .end();
+
+        get_network_station(populate_locations);
+
+    });
+
+    $('#location').change(function() {
+        $('#file')
+        .find('option')
+        .remove()
+        .end();
+
+        $('#date')
+        .find('option')
+        .remove()
+        .end();
+
+        update_filelist();
+    });
+
+    $('#channel').change(function() {
+        $('#file')
+        .find('option')
+        .remove()
+        .end();
+
+        $('#date')
+        .find('option')
+        .remove()
+        .end();
+
+        update_filelist();
+    });
+
+    $('#file').change(function() {
+        $('#date option').eq($("#file")[0].selectedIndex).prop('selected', true);
+        update_image();
+    });
+
+    $('#date').change(function() {
+        $('#file option').eq($("#date")[0].selectedIndex).prop('selected', true);
+        update_image();
+    });
+
+});
+</script>
+
+<h1 class="page-header">{{ admin_view.view_title }}</h1>
+{#    <img src="../data_availability.png">#}
+  <p>
+  Network: <select id="network" name="network" ></select>
+  Station: <select id="station" name="station" ></select>
+  <br>
+  Location: <select id="location" name="location" ></select>
+  Channel: <select id="channel" name="channel" ></select>
+  <br>
+  File: <select id="file" name="file" ></select> or Date: <select id="date" name="date" ></select>
+  </p>
+
+    <img src="#" id="image" name="image" width="100" height="100">
+
+
+{% endblock body %}
