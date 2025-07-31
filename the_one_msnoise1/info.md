@@ -1,1 +1,1 @@
-My msnoise1 before database changes. Put everything in a "msnoise" folder. Name of my environment "msnoise_copy_clean". dynamic wct is hard coded, change "dynamic=False".
+My msnoise1 before database changes. Put everything in a "msnoise" folder. Name of my environment "msnoise_copy_clean". dynamic wct is hard-coded; change "dynamic=False". s09_merge isn't working use merge code in "myplots"
