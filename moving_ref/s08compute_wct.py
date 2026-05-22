@@ -680,7 +680,10 @@ def process_wct_job_adaptive(pair, day, params, taxis, filters, distances_cache=
 
 
                     curr_window_days = stack_size
-                    ref_window_days  = int(ref_start_param) if ref_start_param != 'auto' else stack_size 
+                    if ref_type == 'static':
+                        ref_window_days = None 
+                    else:
+                        ref_window_days  = int(ref_start_param) if ref_start_param != 'auto' else stack_size 
                     ref_lag_days     = separation
 
                     save_day_wct_results_adaptive(
