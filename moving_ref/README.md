@@ -219,30 +219,7 @@ A gap is detected when the time step between consecutive entries exceeds
 - This correctly accounts for velocity steps that occur during data gaps,
   consistent with the text description for the `auto/auto` case
 
-### Error propagation
 
-Errors are propagated as RMS over the reference window:
-
-$$e(t) = \sqrt{\frac{1}{K}\sum_{k \in [t+M-N,\, t+M]} e(t_k)^2 + \Delta e(t)^2}$$
-
-### NaN policy
-
-The reconstructed `dvv` and `err` arrays contain no NaNs. If
-$\Delta\delta v/v(t)$ is NaN, the anchor value is carried forward silently.
-An assertion guards against NaN leakage.
-
-### Usage
-
-```python
-from delta_dvv_integration import DvvIntegrator
-
-integrator = DvvIntegrator(
-    input_base  = 'WCT_MERGED',
-    output_base = 'WCT_INTEGRATED',
-    start_date  = '2018-01-01'
-)
-integrator.process_all(overwrite=True)
-```
 
 Output files mirror the input directory structure under `WCT_INTEGRATED/`.
 
