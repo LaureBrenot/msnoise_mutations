@@ -69,7 +69,7 @@ ref_end   = t - stack_size
 ref_start = ref_end - stack_size
 ```
 
-The reference is the **single preceding non-overlapping stack**. The measured
+The reference is the mean of all stacks within the single preceding non-overlapping window. With gap-free regularly-stepped data this window contains exactly one stack, reducing to a simple lag-1 difference. The measured
 quantity is the velocity change between two consecutive stacks:
 
 $$\Delta\frac{\delta v}{v}(t) = \frac{\delta v}{v}(t)_\mathrm{curr} - \frac{\delta v}{v}(t-1)_\mathrm{ref}$$
@@ -209,7 +209,7 @@ parameters were used during Stage 1.
 
 | ref_end | ref_begin | Reconstruction reduces to |
 |---------|-----------|--------------------------|
-| auto | auto | Simple cumulative sum: $v(t) = v(t-1) + \Delta\delta v/v(t)$ |
+| auto | auto | Simple cumulative sum: $v(t) = v(t-1) + \Delta\delta v/v(t)$ when step_days = stack_size (one stack per window).|
 | auto | N | Mean of N/step past values as anchor |
 | M | auto | Single past value lagged by M days |
 | M | N | Mean of window `[t-M-N, t-M]` as anchor |
@@ -222,8 +222,7 @@ A gap is detected when the time step between consecutive entries exceeds
 - The last reconstructed value before the gap is used as anchor
 - If $\Delta\delta v/v(t)$ is NaN at the gap boundary, the anchor is carried
   forward unchanged
-- This correctly accounts for velocity steps that occur during data gaps,
-  consistent with the text description for the `auto/auto` case
+- This recovers the net velocity change across the gap, the total difference between the last pre-gap and first post-gap stack, but temporal variations within the gap are not resolved.
 
 
 
