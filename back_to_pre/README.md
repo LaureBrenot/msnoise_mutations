@@ -1,5 +1,5 @@
 # Move from msnoise_c back to stable msnoise while keeping the CCs you already computed
-**Why**: This moves the project back to the prior version of msnoise **without recomputing the cross-correlations**. The msnoise_c (msnoise_current) project (database + OUTPUT folder) is only read, never modified, so you can always go back.
+**Why**: This moves the project back to the prior version of msnoise without recomputing the cross-correlations. The msnoise_c (msnoise_current) project (database + OUTPUT folder) is only read, never modified, so you can always go back.
 However, if cc are only covering a few years and not on an extended network, this may be shorter than just starting from scratch in the DB with a cloned environment that has the msnoise folder overwritten with the prior one.
 **What carries over**: CCs (daily stacks + keep_all windows), config values, filters, stations, data_availability, CC job status.
 **What is recomputed by prior msnoise**: REF/MOV stacks, MWCS, DTT, WCT, stretching. These are cheap compared to the CCs.
