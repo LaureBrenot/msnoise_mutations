@@ -25,7 +25,31 @@ The `change_without_kill.md` copied tables one to one. That no longer works here
 Run `inspect` (Step 3) and check the output with these questions:
 1. **Is msnoise_c stopped?** Nobody should be computing while you migrate (`msnoise info -j` should show no `I` jobs).
 2. **Which CC setup is the "real" one?** If `inspect` lists several `cc` or `preprocess` sets, the stable version can only keep one. Get the number (`--cc-set N`, `--preprocess-set N`).
-3. **Are these the right filters?** `inspect` lists every `filter` set with its frequency band. Each one becomes stable filter N (folder `0N`).
+```
+conda activate msnoise_c
+python migrate_c_to_stable.py inspect --src /path/to/msnoise_c_project > inspect_output.txt
+cat inspect_output.txt
+```
+The output looks like this:
+```
+Config sets found:
+  cc                 set=1   21 params  maxlag=60 cc_sampling_rate=20 corr_duration=1800 keep_all=Y keep_days=Y comps=ZZ
+  filter             set=1    6 params  freqmin=0.1 freqmax=1.0 used=Y
+  filter             set=2    6 params  freqmin=1.0 freqmax=4.0 used=Y
+  preprocess         set=1    9 params
+  ...
+Jobs per step / flag:
+  cc_1                 D        9
+  preprocess_1         D        9
+  stack_1              T       18
+Data sources:
+  ref=1 name=local uri=/path/to/SDS structure=SDS
+CC output folders on disk:
+  OUTPUT/preprocess_1/cc_1/filter_1/_output/daily  -> 9 files
+  OUTPUT/preprocess_1/cc_1/filter_1/_output/all  -> 9 files
+  ...
+```
+4. **Are these the right filters?** `inspect` lists every `filter` set with its frequency band. Each one becomes stable filter N (folder `0N`).
 
 With those three answers, nothing else about msnoise_c needs deciding by you.\
 
