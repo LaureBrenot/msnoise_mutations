@@ -1,12 +1,12 @@
 # Move from msnoise_c back to stable msnoise while keeping the CCs you already computed
-**Why**: msnoise_c has too many issues to fix right now. This moves the project back to the stable (classic) msnoise **without recomputing the cross-correlations**. The msnoise_c project (database + OUTPUT folder) is only read, never modified, so you can always go back.
+**Why**: This moves the project back to the prior version of msnoise **without recomputing the cross-correlations**. The msnoise_c (msnoise_current) project (database + OUTPUT folder) is only read, never modified, so you can always go back.
 
 **What carries over**: CCs (daily stacks + keep_all windows), config values, filters, stations, data_availability, CC job status.
-**What is recomputed by stable msnoise**: REF/MOV stacks, MWCS, DTT, WCT, stretching. These are cheap compared to the CCs.
+**What is recomputed by prior msnoise**: REF/MOV stacks, MWCS, DTT, WCT, stretching. These are cheap compared to the CCs.
 
-> **You don't need to know msnoise_c to do this safely.** See the section *"How to be sure it worked"* further down: (1) nothing can be lost, (2) three questions to ask your boss before you start, (3) a `verify` command that checks everything automatically and writes a PASS/FAIL report you can hand over.
+> **You don't need to know msnoise_c to do this safely.** See the section *"How to be sure it worked"* further down: (1) nothing can be lost, (2) three questions to ask before you start, (3) a `verify` command that checks everything automatically and writes a PASS/FAIL report you can hand over.
 
-Your `change_without_kill.md` copied tables one to one. That no longer works here: msnoise_c changed the schema (config sets, a `lineages` table, `workflow_steps`, no `filters` table, relative data paths) and the file layout (NetCDF under `OUTPUT/preprocess_1/cc_1/filter_1/_output/...`). The script `migrate_c_to_stable.py` does the translation.
+The `change_without_kill.md` copied tables one to one. That no longer works here: msnoise_c changed the schema (config sets, a `lineages` table, `workflow_steps`, no `filters` table, relative data paths) and the file layout (NetCDF under `OUTPUT/preprocess_1/cc_1/filter_1/_output/...`). The script `migrate_c_to_stable.py` does the translation.
 
 | | msnoise_c | stable msnoise |
 |---|---|---|
@@ -20,17 +20,44 @@ Your `change_without_kill.md` copied tables one to one. That no longer works her
 ---
 
 ## Step 0: Stop msnoise_c and back up its DB
+
+### Before you start: three questions
+Run `inspect` (Step 3) and check the output with these questions:
+1. **Is msnoise_c stopped?** Nobody should be computing while you migrate (`msnoise info -j` should show no `I` jobs).
+2. **Which CC setup is the "real" one?** If `inspect` lists several `cc` or `preprocess` sets, the stable version can only keep one. Get the number (`--cc-set N`, `--preprocess-set N`).
+3. **Are these the right filters?** `inspect` lists every `filter` set with its frequency band. Each one becomes stable filter N (folder `0N`).
+
+With those three answers, nothing else about msnoise_c needs deciding by you.\
+
+! Use appropriate IP ! 
+check with
+```
+python -c "import pickle; print(pickle.load(open('db.ini','rb')))"
+```
+You'll get something like:
+```
+[2, '10.44.2.1:5020', 'static_c', 'root', 'noise', '']
+```
+That list is tech, host:port, database, user, password and table prefix.
+
 Make sure no msnoise_c job is running (check with `msnoise info -j`), then:
 ```
-./mariadb/bin/mysqldump -h 10.44.2.1 -P 5050 -u root -p static_c > static_c_backup.sql
+./mariadb/bin/mysqldump -h 10.44.2.1 -P 5020 -u root -p static_c > static_c_backup.sql
 ```
 (replace `static_c` with your msnoise_c database name)
 
-## Step 1: Create the empty database for the stable version
+## Step 1: Create the empty database for the stable version and the environement
 ```./mariadb/bin/mysql```
 ```
 CREATE DATABASE IF NOT EXISTS static_stable;
 ```
+Create or clone an environment and check it has no msnoise already
+```
+conda create -n msnoise_stable --clone msnoise_clean
+conda activate msnoise_stable
+python -c "import msnoise; print(msnoise.__file__)"
+```
+Replace the unzip msnoise.zip folder in the site-packages folder to replace the existing msnoise folder (=msnoise_c). Usually path is miniconda/env/env_name/lib/python3.smth/site-package/msnoise
 
 ## Step 2: Create the stable project folder and initialise it with the STABLE msnoise
 Use the conda env that has the stable `msnoise.zip` installed (e.g. `msnoise_clean`), **not** the msnoise_c env.
@@ -120,15 +147,7 @@ For new data, use the normal routine: `msnoise scan_archive`, `msnoise new_jobs`
 - Step 0 also gives you a SQL backup of the msnoise_c DB.
 - If anything looks wrong, drop `static_stable`, delete the stable folder, and start again from Step 1. The worst case is lost time, never lost CCs.
 
-### 2. Before you start: three questions for your boss
-Run `inspect` (Step 3) and send the output to your boss with these questions:
-1. **Is msnoise_c stopped?** Nobody should be computing while you migrate (`msnoise info -j` should show no `I` jobs).
-2. **Which CC setup is the "real" one?** If `inspect` lists several `cc` or `preprocess` sets, the stable version can only keep one. Get the number (`--cc-set N`, `--preprocess-set N`).
-3. **Are these the right filters?** `inspect` lists every `filter` set with its frequency band. Each one becomes stable filter N (folder `0N`).
-
-With those three answers, nothing else about msnoise_c needs deciding by you.
-
-### 3. After the migration: the `verify` command (Step 5b)
+### 2. After the migration: the `verify` command (Step 5b)
 It compares the stable project with the msnoise_c one and checks:
 
 | check | what it proves |
@@ -146,9 +165,9 @@ On a very large project you can check the numbers in a random subset first with 
 
 **How I tested `verify`:** I ran it on a copy of my test migration where I broke 8 things on purpose: deleted one CC file, changed one number by 0.000001 in one file, added a stray file, changed maxlag, changed a filter band, disabled a station, broke the data paths, and reset 2 finished jobs. It caught all 8 and returned `FAIL`. On the correct migration it returns `PASS`.
 
-### 4. What to show your boss
+### 4. What to show
 - `migration_check.txt` (the PASS report).
-- Once the stable version has run stack/MWCS/DTT (or WCT) on a few pairs, compare those dv/v curves with any dv/v plots your boss already has from msnoise_c. The CCs are byte-identical, so any difference comes from the stable version's post-processing, not from the migration.
+- Once the stable version has run stack/MWCS/DTT (or WCT) on a few pairs, compare those dv/v curves with any dv/v plots you already have from msnoise_c. The CCs are byte-identical, so any difference comes from the stable version's post-processing, not from the migration.
 
 ---
 
