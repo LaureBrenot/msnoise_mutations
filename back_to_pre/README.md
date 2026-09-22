@@ -202,3 +202,19 @@ On a very large project you can check the numbers in a random subset first with 
   - stacking, MWCS and WCT on the migrated CCs is consistent (all CCs come from one version);
   - if you compute **new days** with stable msnoise and append them to msnoise_c CCs, check a few overlap days. Recompute 2–3 days with stable msnoise in a scratch copy and compare dv/v before trusting the join. If it matters, recompute everything with one version.
 - WCT on the **first day** fails with "No data for …" in stable msnoise. This also happens when stable msnoise computes the CCs itself: its 1D moving stack is labelled on the next day. It is not caused by the migration.
+
+
+
+
+
+
+
+
+
+
+conda activate msnoise_stable
+conda install -c conda-forge xarray netcdf4 pytables pandas scipy numpy obspy matplotlib sqlalchemy sqlalchemy-utils pymysql click logbook flask flask-admin flask-wtf markdown "setuptools<81"
+pip install pycwt
+
+
+python -c "import xarray, netCDF4, tables, obspy, pandas, sqlalchemy, sqlalchemy_utils, pymysql, click, logbook, flask, flask_admin, pycwt; print('all OK')"
