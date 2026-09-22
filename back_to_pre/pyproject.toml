@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "msnoise"
+version = "1.6.post1"
+description = "MSNoise - stable version (lab fork)"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy", "scipy", "pandas", "tables", "xarray", "netCDF4",
+    "obspy", "sqlalchemy", "sqlalchemy-utils", "pymysql",
+    "click", "logbook", "matplotlib",
+    "flask", "flask-admin", "flask-wtf", "markdown",
+    "pycwt",
+]
+
+[project.scripts]
+msnoise = "msnoise.scripts.msnoise:run"
+
+[tool.setuptools.packages.find]
+include = ["msnoise*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.csv", "RELEASE-VERSION", "templates/**/*", "static/**/*", "*.html", "*.js", "*.css"]
