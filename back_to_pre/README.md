@@ -230,3 +230,6 @@ python -c "import pymysql; c=pymysql.connect(host='localhost', user='msnoise', p
 
 
 python -c "import pymysql; c=pymysql.connect(host='localhost',user='msnoise',password='msnoise',database='kilauea2'); cur=c.cursor(); cur.execute('SELECT * FROM filters'); print(cur.fetchall())"
+
+
+dir /s /b E:\Kilauea\STACKS\03\001_DAYS | find /c ".MSEED"
