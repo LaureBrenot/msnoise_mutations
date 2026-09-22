@@ -218,3 +218,10 @@ pip install pycwt
 
 
 python -c "import xarray, netCDF4, tables, obspy, pandas, sqlalchemy, sqlalchemy_utils, pymysql, click, logbook, flask, flask_admin, pycwt; print('all OK')"
+
+
+
+python -c "import pymysql; c=pymysql.connect(host='localhost', user='msnoise', password='msnoise', database='kilauea2'); cur=c.cursor(); cur.execute('SHOW TABLES'); print(cur.fetchall()); cur.execute('SELECT jobtype, flag, COUNT(*) FROM jobs GROUP BY jobtype, flag'); print(cur.fetchall())"
+
+
+python -c "import pymysql; c=pymysql.connect(host='localhost', user='msnoise', password='msnoise'); cur=c.cursor(); cur.execute('SHOW DATABASES'); print(cur.fetchall())"
