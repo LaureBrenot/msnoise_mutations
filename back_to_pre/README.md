@@ -225,3 +225,8 @@ python -c "import pymysql; c=pymysql.connect(host='localhost', user='msnoise', p
 
 
 python -c "import pymysql; c=pymysql.connect(host='localhost', user='msnoise', password='msnoise'); cur=c.cursor(); cur.execute('SHOW DATABASES'); print(cur.fetchall())"
+
+
+
+
+python -c "import pymysql; c=pymysql.connect(host='localhost',user='msnoise',password='msnoise',database='kilauea2'); cur=c.cursor(); cur.execute('SELECT * FROM filters'); print(cur.fetchall())"
