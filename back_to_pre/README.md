@@ -277,6 +277,25 @@ msnoise db init
 
 
 
+
+
+notepad C:\Users\Administrateur\anaconda3\envs\msnoise_stable\Lib\site-packages\msnoise\msnoise_admin.py
+
+
+    admin = Admin(app, template_mode='bootstrap4')
+
+
+        try:
+        admin = Admin(app, template_mode='bootstrap4')   # flask-admin 1.x
+    except TypeError:
+        from flask_admin.theme import Bootstrap4Theme    # flask-admin 2.x
+        admin = Admin(app, theme=Bootstrap4Theme())
+
+
+        pip install "flask-admin<2" "wtforms<3.1"
+
+
+
 python clone_classic.py --src E:\Kilauea\stable_dir_LB --dst E:\Kilauea\focus_2024_2026 --start 2024-01-01 --end 2026-12-31
 
 
