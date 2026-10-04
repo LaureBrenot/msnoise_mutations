@@ -1,0 +1,220 @@
+#!/usr/bin/env python
+"""
+check_project.py - inventory of a classic MSNoise project, per station pair.
+
+For every pair it reports:
+  cc_done        : CC jobs marked D
+  stack_done     : STACK jobs marked D
+  stack_todo     : STACK jobs marked T (+ I = interrupted)
+  daily_files    : .MSEED daily CCFs present on disk (STACKS/<ff>/001_DAYS/...)
+  mov_files      : stacked outputs written so far (STACKS2/<ff>/<mov>/<comp>/pair.nc)
+  sta_used       : are both stations flagged used=1 in the stations table
+  status         : OK / NO DATA ON DISK / STATION UNUSED / ...
+
+Writes project_check.csv and project_check.png, prints a summary.
+
+Run it from the project folder (the one with db.ini):
+    python check_project.py
+Options:
+    --no-plot       skip the figure
+"""
+import argparse
+import collections
+import os
+import pickle
+import sys
+
+import numpy as np
+
+
+def read_ini(folder="."):
+    with open(os.path.join(folder, "db.ini"), "rb") as f:
+        v = list(pickle.load(f))
+    if len(v) == 5:
+        v.append("")
+    return v
+
+
+def connect(folder="."):
+    tech, host, db, user, pw, prefix = read_ini(folder)
+    if tech == 1:
+        import sqlite3
+        p = host if os.path.isabs(host) else os.path.join(folder, host)
+        return sqlite3.connect(p), prefix
+    import pymysql
+    if ":" in str(host):
+        h, port = host.split(":")
+        port = int(port)
+    else:
+        h, port = host, 3306
+    return pymysql.connect(host=h, port=port, user=user, password=pw,
+                           database=db), prefix
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--folder", default=".", help="project folder (default: here)")
+    ap.add_argument("--no-plot", action="store_true")
+    a = ap.parse_args()
+    root = os.path.abspath(a.folder)
+
+    con, prefix = connect(root)
+    p = (prefix + "_") if prefix else ""
+    cur = con.cursor()
+
+    # ---- database side -------------------------------------------------
+    cur.execute("SELECT jobtype, flag, pair, COUNT(*) FROM %sjobs "
+                "GROUP BY jobtype, flag, pair" % p)
+    jobs = collections.defaultdict(int)
+    pairs = set()
+    for jobtype, flag, pair, n in cur.fetchall():
+        jobs[(pair, jobtype, flag)] += n
+        if jobtype in ("CC", "STACK"):
+            pairs.add(pair)
+
+    cur.execute("SELECT net, sta, used FROM %sstations" % p)
+    used = {"%s.%s" % (n, s): bool(u) for n, s, u in cur.fetchall()}
+
+    cur.execute("SELECT ref, low, high, used FROM %sfilters" % p)
+    filters = [(int(r), lo, hi, bool(u)) for r, lo, hi, u in cur.fetchall()]
+    used_filters = [f for f in filters if f[3]]
+    print("filters in database:", filters)
+    if not used_filters:
+        sys.exit("No filter with used=1: stacking would do nothing.")
+
+    # ---- disk side -----------------------------------------------------
+    # STACKS/<ff>/001_DAYS/<comp>/<sta1>_<sta2>/<date>.MSEED
+    daily = collections.Counter()
+    for fid, lo, hi, u in used_filters:
+        base = os.path.join(root, "STACKS", "%02i" % fid, "001_DAYS")
+        if not os.path.isdir(base):
+            print("WARNING: %s does not exist" % base)
+            continue
+        for comp in os.listdir(base):
+            cdir = os.path.join(base, comp)
+            if not os.path.isdir(cdir):
+                continue
+            for pairdir in os.scandir(cdir):
+                if not pairdir.is_dir():
+                    continue
+                key = pairdir.name.replace("_", ":", 1) if ":" not in pairdir.name \
+                    else pairdir.name
+                n = sum(1 for _ in os.scandir(pairdir.path))
+                daily[(key, comp)] += n
+
+    # STACKS2/<ff>/<mov>/<comp>/<sta1>_<sta2>.nc  (written by the MOV stack)
+    movfiles = collections.Counter()
+    s2 = os.path.join(root, "STACKS2")
+    if os.path.isdir(s2):
+        for dirpath, dirnames, filenames in os.walk(s2):
+            for fn in filenames:
+                if fn.endswith(".nc"):
+                    key = fn[:-3].replace("_", ":", 1)
+                    movfiles[key] += 1
+
+    # ---- combine -------------------------------------------------------
+    rows = []
+    for pair in sorted(pairs):
+        s1, s2_ = pair.split(":")
+        sta1 = ".".join(s1.split(".")[:2])
+        sta2 = ".".join(s2_.split(".")[:2])
+        d = sum(v for (k, c), v in daily.items() if k == pair)
+        row = dict(
+            pair=pair,
+            cc_done=jobs[(pair, "CC", "D")],
+            cc_todo=jobs[(pair, "CC", "T")] + jobs[(pair, "CC", "I")],
+            stack_done=jobs[(pair, "STACK", "D")],
+            stack_todo=jobs[(pair, "STACK", "T")] + jobs[(pair, "STACK", "I")],
+            daily_files=d,
+            mov_files=movfiles.get(pair, 0),
+            sta_used=used.get(sta1, True) and used.get(sta2, True),
+        )
+        if not row["sta_used"]:
+            row["status"] = "STATION UNUSED (stacking it is wasted)"
+        elif row["daily_files"] == 0:
+            row["status"] = "NO DATA ON DISK (will be skipped)"
+        elif row["stack_todo"] == 0 and row["stack_done"]:
+            row["status"] = "DONE"
+        elif row["mov_files"]:
+            row["status"] = "IN PROGRESS"
+        else:
+            row["status"] = "TODO"
+        rows.append(row)
+
+    cols = ["pair", "cc_done", "cc_todo", "stack_done", "stack_todo",
+            "daily_files", "mov_files", "sta_used", "status"]
+    out = os.path.join(root, "project_check.csv")
+    with open(out, "w") as f:
+        f.write(",".join(cols) + "\n")
+        for r in rows:
+            f.write(",".join(str(r[c]) for c in cols) + "\n")
+
+    # ---- summary -------------------------------------------------------
+    by_status = collections.Counter(r["status"] for r in rows)
+    print("\npairs: %d" % len(rows))
+    for k, v in by_status.most_common():
+        print("  %-40s %4d" % (k, v))
+    tot_cc = sum(r["cc_done"] for r in rows)
+    tot_files = sum(r["daily_files"] for r in rows)
+    done = [r for r in rows if r["status"] == "DONE"]
+    todo = [r for r in rows if r["status"] == "TODO"]
+    print("\nCC jobs done              : %d" % tot_cc)
+    print("daily CCF files on disk   : %d" % tot_files)
+    print("STACK jobs done / to do   : %d / %d"
+          % (sum(r["stack_done"] for r in rows), sum(r["stack_todo"] for r in rows)))
+    if todo:
+        print("pairs left to stack       : %d (%d daily files)"
+              % (len(todo), sum(r["daily_files"] for r in todo)))
+    skip = [r for r in rows if r["status"].startswith(("NO DATA", "STATION"))]
+    if skip:
+        print("\npairs that will produce nothing (%d):" % len(skip))
+        for r in skip[:20]:
+            print("   %-28s cc_done=%-7d files=%-6d %s"
+                  % (r["pair"], r["cc_done"], r["daily_files"], r["status"]))
+        if len(skip) > 20:
+            print("   ... and %d more (see project_check.csv)" % (len(skip) - 20))
+    print("\nwritten: %s" % out)
+
+    # ---- figure --------------------------------------------------------
+    if a.no_plot:
+        return
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("matplotlib not available, skipping the figure")
+        return
+
+    rows_sorted = sorted(rows, key=lambda r: -r["cc_done"])
+    y = np.arange(len(rows_sorted))
+    cc = np.array([r["cc_done"] for r in rows_sorted], dtype=float)
+    files = np.array([r["daily_files"] for r in rows_sorted], dtype=float)
+    sdone = np.array([r["stack_done"] for r in rows_sorted], dtype=float)
+
+    fig, axes = plt.subplots(1, 3, figsize=(14, max(4, len(rows) * 0.12)),
+                             sharey=True)
+    axes[0].barh(y, cc, color="0.6")
+    axes[0].set_title("CC jobs done")
+    axes[1].barh(y, files, color="tab:blue")
+    axes[1].set_title("daily CCF files on disk")
+    axes[2].barh(y, sdone, color="tab:green")
+    axes[2].set_title("STACK jobs done")
+    for ax in axes:
+        ax.set_ylim(-0.5, len(rows_sorted) - 0.5)
+        ax.invert_yaxis()
+        ax.grid(axis="x", alpha=.3)
+    if len(rows_sorted) <= 80:
+        axes[0].set_yticks(y)
+        axes[0].set_yticklabels([r["pair"] for r in rows_sorted], fontsize=6)
+    else:
+        axes[0].set_ylabel("station pairs (sorted by CC count)")
+    fig.suptitle("MSNoise project check - %s" % root)
+    fig.tight_layout()
+    png = os.path.join(root, "project_check.png")
+    fig.savefig(png, dpi=120)
+    print("written: %s" % png)
+
+
+if __name__ == "__main__":
+    main()
