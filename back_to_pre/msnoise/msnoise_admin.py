@@ -936,7 +936,11 @@ def get_app():
     plugins = get_config(db, "plugins")
     db.close()
 
-    admin = Admin(app, template_mode='bootstrap4')
+    try:
+        admin = Admin(app, template_mode='bootstrap4')   # flask-admin 1.x
+    except TypeError:
+        from flask_admin.theme import Bootstrap4Theme    # flask-admin 2.x
+        admin = Admin(app, theme=Bootstrap4Theme())
 
     if "msnoise_brand" in os.environ:
         tmp = eval(os.environ["msnoise_brand"])
