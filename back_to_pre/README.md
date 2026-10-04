@@ -254,4 +254,12 @@ CCs computed by msnoise_c and by this version are very close but not identical (
 %%%%
 
 
-python -c "import pymysql; c=pymysql.connect(host='localhost',user='msnoise',password='msnoise',database='kilauea_stable'); cur=c.cursor(); cur.execute(\"SELECT flag, COUNT(DISTINCT pair) FROM jobs WHERE jobtype='STACK' GROUP BY flag\"); print(cur.fetchall())"
+import pymysql
+c = pymysql.connect(host='localhost', user='msnoise', password='msnoise',
+                    database='kilauea_stable')
+cur = c.cursor()
+cur.execute("SELECT flag, COUNT(DISTINCT pair) FROM jobs "
+            "WHERE jobtype='STACK' GROUP BY flag")
+print("pairs per flag:", cur.fetchall())
+cur.execute("SELECT jobtype, flag, COUNT(*) FROM jobs GROUP BY jobtype, flag")
+print("jobs:", cur.fetchall())
