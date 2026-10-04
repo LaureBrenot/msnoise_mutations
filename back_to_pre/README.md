@@ -245,3 +245,13 @@ python migrate_c_to_stable.py verify  --src <C_FOLDER> --dst . --cc-set 1 --thre
 - Then run section 3.6.
 
 CCs computed by msnoise_c and by this version are very close but not identical (correlation ≈ 0.995). Stacking and dv/v on the migrated CCs are consistent. If new days are computed with this version, compare a few overlap days before trusting the join.
+
+
+
+
+
+
+%%%%
+
+
+python -c "import pymysql; c=pymysql.connect(host='localhost',user='msnoise',password='msnoise',database='kilauea_stable'); cur=c.cursor(); cur.execute(\"SELECT flag, COUNT(DISTINCT pair) FROM jobs WHERE jobtype='STACK' GROUP BY flag\"); print(cur.fetchall())"
