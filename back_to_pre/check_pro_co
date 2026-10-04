@@ -104,13 +104,18 @@ def main():
 
     # STACKS2/<ff>/<mov>/<comp>/<sta1>_<sta2>.nc  (written by the MOV stack)
     movfiles = collections.Counter()
+    reffiles = collections.Counter()
     s2 = os.path.join(root, "STACKS2")
     if os.path.isdir(s2):
         for dirpath, dirnames, filenames in os.walk(s2):
+            isref = os.sep + "REF" + os.sep in dirpath + os.sep
             for fn in filenames:
                 if fn.endswith(".nc"):
                     key = fn[:-3].replace("_", ":", 1)
-                    movfiles[key] += 1
+                    if isref:
+                        reffiles[key] += 1   # written by `stack -r`
+                    else:
+                        movfiles[key] += 1   # written by `stack -m`
 
     # ---- combine -------------------------------------------------------
     rows = []
@@ -126,6 +131,7 @@ def main():
             stack_done=jobs[(pair, "STACK", "D")],
             stack_todo=jobs[(pair, "STACK", "T")] + jobs[(pair, "STACK", "I")],
             daily_files=d,
+            ref_files=reffiles.get(pair, 0),
             mov_files=movfiles.get(pair, 0),
             sta_used=used.get(sta1, True) and used.get(sta2, True),
         )
@@ -135,14 +141,14 @@ def main():
             row["status"] = "NO DATA ON DISK (will be skipped)"
         elif row["stack_todo"] == 0 and row["stack_done"]:
             row["status"] = "DONE"
-        elif row["mov_files"]:
-            row["status"] = "IN PROGRESS"
+        elif row["stack_done"] and row["stack_todo"]:
+            row["status"] = "PARTLY DONE"
         else:
             row["status"] = "TODO"
         rows.append(row)
 
     cols = ["pair", "cc_done", "cc_todo", "stack_done", "stack_todo",
-            "daily_files", "mov_files", "sta_used", "status"]
+            "daily_files", "ref_files", "mov_files", "sta_used", "status"]
     out = os.path.join(root, "project_check.csv")
     with open(out, "w") as f:
         f.write(",".join(cols) + "\n")
