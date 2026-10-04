@@ -263,3 +263,22 @@ cur.execute("SELECT flag, COUNT(DISTINCT pair) FROM jobs "
 print("pairs per flag:", cur.fetchall())
 cur.execute("SELECT jobtype, flag, COUNT(*) FROM jobs GROUP BY jobtype, flag")
 print("jobs:", cur.fetchall())
+
+
+
+
+
+cd E:\Kilauea\stable_dir_LB
+python -c "import pymysql; c=pymysql.connect(host='localhost',user='msnoise',password='msnoise'); c.cursor().execute('CREATE DATABASE IF NOT EXISTS kilauea_2024_2026'); print('created')"
+mkdir E:\Kilauea\focus_2024_2026
+cd E:\Kilauea\focus_2024_2026
+msnoise db init
+
+
+
+
+python clone_classic.py --src E:\Kilauea\stable_dir_LB --dst E:\Kilauea\focus_2024_2026 --start 2024-01-01 --end 2026-12-31
+
+
+cd E:\Kilauea\focus_2024_2026
+mklink /J STACKS E:\Kilauea\stable_dir_LB\STACKS
